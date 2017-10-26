@@ -8,5 +8,5 @@ features so far:
 - play
 - stop
 
-<img src=https://github.com/nsklaus/audioplayer/blob/master/screenshot.png?raw=true>
+<img src="https://github.com/nsklaus/audioplayer/blob/master/screenshot.png?raw=true">
 
