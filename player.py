@@ -117,11 +117,10 @@ class App(object):
 
     def rem(self):
         current = self.listbox.curselection()
-
-        pass
+        self.listbox.delete(current)
 
     def clear(self):
-        pass
+        self.listbox.delete(0, END)
 
 
 app = App()
