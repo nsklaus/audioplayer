@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter.filedialog import askopenfilenames
 from tkinter import ttk
 
-# TODO: remember last visited folder in filedialog
 # TODO: make the player to automatically go to the next song
 # TODO: make double click on a song to start playing
 
@@ -19,14 +18,12 @@ class App(object):
         self.style = ttk.Style()
         self.style.theme_use('clam')
         self.root.title('mp3 player')
-        # self.root.grid_columnconfigure(1, weight=1)
-        # self.root.grid_rowconfigure(2, weight=1)
+        self.parent_path = ""
 
         gui_style = ttk.Style()
         gui_style.configure('My.TFrame', background='#334353')
         self.frm = ttk.Frame(self.root, style='My.TFrame')
         self.frm.pack(anchor=N)
-        # self.frm.grid(column=0, row=0, sticky='news')
 
         self.current_song = 0
 
@@ -76,7 +73,6 @@ class App(object):
         self.listbox = Listbox(self.root)
         self.listbox.pack(fill=BOTH, expand=YES)
 
-
     def back(self):
         current = self.listbox.curselection()
         prev = current[0] - 1
@@ -84,14 +80,16 @@ class App(object):
         pass
 
     def play(self, trackn=None):
-        if not trackn:
-            print("trackn is null")
-            my_string = self.listbox.get(0)
-            self.listbox.selection_clear(0, END)
-            self.listbox.selection_set(0, 0)
+        if not trackn:  # case: no track was played before
+            trackn = self.listbox.curselection()  # try to see if something is selected in the list
+            if not trackn:  # case: nothing is selected in the list
+                my_string = self.listbox.get(0)
+                self.listbox.selection_clear(0, END)
+                self.listbox.selection_set(0, 0)
+            else:
+                my_string = self.listbox.get(trackn)
             pygame.mixer.music.load(my_string)
         else:
-            print("trackn is not null")
             my_string = self.listbox.get(trackn)
             self.listbox.selection_clear(0, END)
             self.listbox.selection_set(trackn, trackn)
@@ -101,15 +99,21 @@ class App(object):
 
     def next(self):
         current = self.listbox.curselection()
-        prev = current[0] + 1
-        self.play(trackn=prev)
+        next_track = current[0] + 1
+        self.play(trackn=next_track)
 
     def stop(self):
         pygame.mixer.music.stop()
 
     def add(self):
-        self.frm.filename = askopenfilenames(initialdir="~")
-        self.listbox.insert(END, self.frm.filename)
+        if self.parent_path:
+            self.frm.filename = askopenfilenames(initialdir=self.parent_path)
+        else:
+            self.frm.filename = askopenfilenames(initialdir="~")
+
+        for index, item in list(enumerate(self.frm.filename)):
+            self.listbox.insert(END, self.frm.filename[index])
+        self.parent_path = self.frm.filename[0].rsplit('/', 1)[0]  # remember last visited dir
 
     def rem(self):
         current = self.listbox.curselection()
@@ -118,6 +122,7 @@ class App(object):
 
     def clear(self):
         pass
+
 
 app = App()
 app.root.mainloop()
