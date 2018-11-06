@@ -20,7 +20,7 @@ class App(object):
         self.parent_path = ""
         self.track_list = []
         self.current_song = 0
-        self.song_text = IntVar()
+        self.song_text = ""
 
         # gui_style = ttk.Style()
         # gui_style.configure('My.TFrame', background='#334353')
@@ -70,18 +70,20 @@ class App(object):
         button_clr['command'] = self.clear
         button_clr.pack(side=LEFT)
 
-        # self.song_label = Label(self.frm, text=self.song_text)
-        # self.song_label.pack(side=LEFT, padx=5)
-        self.scale = ttk.Scale(self.frm, orient=HORIZONTAL, length=100, from_=1, to=100)
-        self.scale.pack(side=LEFT, padx=5)
+        self.frame_slider = Frame(self.root)
+        self.song_label = Label(self.frame_slider, text="")
+        self.song_label.pack(side=RIGHT, padx=5)
+        self.scale = ttk.Scale(self.frame_slider, orient=HORIZONTAL, length=250, from_=1, to=100)
+        self.frame_slider.pack(anchor=NW)
+        self.scale.pack(side=LEFT, padx=5, pady=5)
 
-        self.frame = Frame(self.root)
-        self.listbox = Listbox(self.frame, background="WHITE")
+        self.frame_listbox = Frame(self.root)
+        self.listbox = Listbox(self.frame_listbox, background="WHITE")
         self.listbox.bind('<Double-Button-1>', self.list_click)
-        self.scroll = Scrollbar(self.frame, orient="vertical", command=self.listbox.yview)
+        self.scroll = Scrollbar(self.frame_listbox, orient="vertical", command=self.listbox.yview)
 
         self.listbox.configure(yscrollcommand=self.scroll.set)
-        self.frame.pack(expand=True, fill=BOTH)
+        self.frame_listbox.pack(expand=True, fill=BOTH)
         self.listbox.pack(side="left", expand=True, fill=BOTH )
         self.scroll.pack(side="left", fill=Y)
 
@@ -96,6 +98,7 @@ class App(object):
         if len(list(self.listbox.get(0, END))) > 0:  # if we have a list of song
             if not self.listbox.curselection():  # if no song is selected in the list
                 self.listbox.selection_set(0, 0)  # set selection to first file
+                self.song_label["text"] = "3:41"
 
             if trackn is not None:
                 if not trackn < 0 and not trackn >= len(self.track_list):
