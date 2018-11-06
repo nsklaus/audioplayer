@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pygame
+from mutagen.mp3 import MP3
 from tkinter import *
 from tkinter.filedialog import askopenfilenames
 from tkinter import ttk
@@ -21,10 +22,9 @@ class App(object):
         self.track_list = []
         self.current_song = 0
         self.song_text = ""
+        self.song_length = 0
 
-        # gui_style = ttk.Style()
-        # gui_style.configure('My.TFrame', background='#334353')
-        self.frm = ttk.Frame(self.root)  # , style='My.TFrame')
+        self.frm = ttk.Frame(self.root)
         self.frm.pack(anchor=N)
 
         self.im_back = PhotoImage(file="images/back.png")
@@ -80,7 +80,7 @@ class App(object):
         self.frame_listbox = Frame(self.root)
         self.listbox = Listbox(self.frame_listbox, background="WHITE")
         self.listbox.bind('<Double-Button-1>', self.list_click)
-        self.scroll = Scrollbar(self.frame_listbox, orient="vertical", command=self.listbox.yview)
+        self.scroll = ttk.Scrollbar(self.frame_listbox, orient="vertical", command=self.listbox.yview)
 
         self.listbox.configure(yscrollcommand=self.scroll.set)
         self.frame_listbox.pack(expand=True, fill=BOTH)
@@ -98,7 +98,6 @@ class App(object):
         if len(list(self.listbox.get(0, END))) > 0:  # if we have a list of song
             if not self.listbox.curselection():  # if no song is selected in the list
                 self.listbox.selection_set(0, 0)  # set selection to first file
-                self.song_label["text"] = "3:41"
 
             if trackn is not None:
                 if not trackn < 0 and not trackn >= len(self.track_list):
@@ -110,13 +109,21 @@ class App(object):
                     self.listbox.selection_clear(0, END)
                     self.listbox.selection_set(self.current_song, self.current_song)
                     # add back path to filename when loading a song
+                    file = self.parent_path + "/" + self.track_list[self.current_song]
+                    self.song_length = int(MP3(file).info.length)
+                    # self.song_label["text"] =  audio.info.length # round((audio.info.length/60), 2)
                     pygame.mixer.music.load(self.parent_path + "/" + self.track_list[self.current_song])
                     pygame.mixer.music.play()
+                else:
+                    elapsed_seconds = int((pygame.mixer.music.get_pos()/1000))
+                    time_left_seconds = (self.song_length - elapsed_seconds)
+                    minutes = time_left_seconds // 60
+                    seconds = time_left_seconds % 60
+                    final_time = str(minutes), ":", str(seconds).rjust(2, '0')
+                    self.song_label["text"] = final_time
+                    # (pygame.mixer.music.get_pos()/1000)%60
 
-            # wip: making song progress being shown (will need to switch to mixer.Sound)
-            # if pygame.mixer.music.get_busy():
-            # self.song_label["text"] = self.scale.get()
-        self.root.after(2000, self.play)
+        self.root.after(1000, self.play)
 
     def back(self):
         current = self.listbox.curselection()

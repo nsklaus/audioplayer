@@ -11,10 +11,11 @@ features so far:
 - allow double-click on a listed track to start it  
 - scrollbar for lengthy playlists  
 - don't show file paths in the listbox  
+- show time remaining for currently being played song
 - plays a variety of formats (ogg, mp3, amiga mods, ..)  
 
 ## todo:  
-- show track progress  
+- show track progress slider  
 - save/load playlists
   
 
