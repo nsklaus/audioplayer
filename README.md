@@ -9,11 +9,12 @@ features so far:
 - filedialog remembers last visted directory  
 - automatically go to the next track  
 - allow double-click on a listed track to start it  
+- scrollbar for lengthy playlists  
+- don't show file paths in the listbox  
 - plays a variety of formats (ogg, mp3, amiga mods, ..)  
 
 ## todo:  
 - show track progress  
-- scrollbar for lengthy playlists  
 - save/load playlists
   
 
