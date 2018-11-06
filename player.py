@@ -2,7 +2,7 @@
 import pygame
 from tkinter import *
 from tkinter.filedialog import askopenfilenames
-from tkinter import ttk, scrolledtext as stext
+from tkinter import ttk
 
 # TODO: make proper stop functionality (atm it works but it's not cleanly done)
 
@@ -20,10 +20,11 @@ class App(object):
         self.parent_path = ""
         self.track_list = []
         self.current_song = 0
+        self.song_text = IntVar()
 
-        gui_style = ttk.Style()
-        gui_style.configure('My.TFrame', background='#334353')
-        self.frm = ttk.Frame(self.root, style='My.TFrame')
+        # gui_style = ttk.Style()
+        # gui_style.configure('My.TFrame', background='#334353')
+        self.frm = ttk.Frame(self.root)  # , style='My.TFrame')
         self.frm.pack(anchor=N)
 
         self.im_back = PhotoImage(file="images/back.png")
@@ -69,9 +70,11 @@ class App(object):
         button_clr['command'] = self.clear
         button_clr.pack(side=LEFT)
 
-        # self.text = stext.ScrolledText(self.root, background="WHITE", width=40, height=16)
-        # self.text.bind('<Double-Button-1>', self.list_click)
-        # self.text.pack()
+        # self.song_label = Label(self.frm, text=self.song_text)
+        # self.song_label.pack(side=LEFT, padx=5)
+        self.scale = ttk.Scale(self.frm, orient=HORIZONTAL, length=100, from_=1, to=100)
+        self.scale.pack(side=LEFT, padx=5)
+
         self.frame = Frame(self.root)
         self.listbox = Listbox(self.frame, background="WHITE")
         self.listbox.bind('<Double-Button-1>', self.list_click)
@@ -89,11 +92,10 @@ class App(object):
             if event.type == song_end:
                 if not self.current_song >= len(self.track_list):
                     self.current_song += 1
-                    print("the song ended!")
 
         if len(list(self.listbox.get(0, END))) > 0:  # if we have a list of song
             if not self.listbox.curselection():  # if no song is selected in the list
-                self.listbox.selection_set(0, 0)
+                self.listbox.selection_set(0, 0)  # set selection to first file
 
             if trackn is not None:
                 if not trackn < 0 and not trackn >= len(self.track_list):
@@ -104,11 +106,13 @@ class App(object):
                 if not pygame.mixer.music.get_busy():
                     self.listbox.selection_clear(0, END)
                     self.listbox.selection_set(self.current_song, self.current_song)
-                    print("goood path = ", self.parent_path + "/" + self.track_list[self.current_song])
+                    # add back path to filename when loading a song
                     pygame.mixer.music.load(self.parent_path + "/" + self.track_list[self.current_song])
-                    # print(self.track_list[self.current_song])
                     pygame.mixer.music.play()
 
+            # wip: making song progress being shown (will need to switch to mixer.Sound)
+            # if pygame.mixer.music.get_busy():
+            # self.song_label["text"] = self.scale.get()
         self.root.after(2000, self.play)
 
     def back(self):
@@ -123,7 +127,7 @@ class App(object):
 
     def stop(self):
         pygame.mixer.music.stop()
-        self.current_song = len(self.track_list)  # dirty trick, will make it better
+        self.current_song = len(self.track_list)  # not sure if this is the correct way but it works
 
     def add(self):
         if self.parent_path:
@@ -131,12 +135,13 @@ class App(object):
         else:
             self.frm.filename = askopenfilenames(initialdir="~")
 
-        self.parent_path = self.frm.filename[0].rsplit('/', 1)[0]  # remember last visited dir
+        if self.frm.filename:
+            self.parent_path = self.frm.filename[0].rsplit('/', 1)[0]  # remember last visited dir
+
         for index, item in list(enumerate(self.frm.filename)):
-            # don't show path in listbox
+            # don't show path in listbox  --> .replace(path, "")
             self.listbox.insert(END, self.frm.filename[index].replace(self.parent_path + "/", ""))
 
-        print("parent=", self.parent_path)
         self.track_list = list(self.listbox.get(0, END))  # get list of song
 
     def rem(self):
@@ -147,7 +152,6 @@ class App(object):
         self.listbox.delete(0, END)
 
     def list_click(self, event):
-
         current = self.listbox.curselection()
         self.play(trackn=current[0])
 
