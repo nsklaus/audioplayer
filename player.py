@@ -93,6 +93,7 @@ class App(object):
         for event in pygame.event.get():
             if event.type == song_end:
                 if not self.current_song >= len(self.track_list):
+                    self.scale.set(0)
                     self.current_song += 1
 
         if len(list(self.listbox.get(0, END))) > 0:  # if we have a list of song
@@ -111,16 +112,20 @@ class App(object):
                     # add back path to filename when loading a song
                     file = self.parent_path + "/" + self.track_list[self.current_song]
                     self.song_length = int(MP3(file).info.length)
+                    songlength = self.song_length
+                    self.scale.config(to=songlength)
                     # self.song_label["text"] =  audio.info.length # round((audio.info.length/60), 2)
                     pygame.mixer.music.load(self.parent_path + "/" + self.track_list[self.current_song])
                     pygame.mixer.music.play()
                 else:
                     elapsed_seconds = int((pygame.mixer.music.get_pos()/1000))
+                    self.scale.set(elapsed_seconds)
                     time_left_seconds = (self.song_length - elapsed_seconds)
                     minutes = time_left_seconds // 60
                     seconds = time_left_seconds % 60
                     final_time = str(minutes), ":", str(seconds).rjust(2, '0')
                     self.song_label["text"] = final_time
+                    # self.scale.set()
                     # (pygame.mixer.music.get_pos()/1000)%60
 
         self.root.after(1000, self.play)
