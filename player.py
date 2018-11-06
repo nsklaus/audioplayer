@@ -2,7 +2,7 @@
 import pygame
 from tkinter import *
 from tkinter.filedialog import askopenfilenames
-from tkinter import ttk
+from tkinter import ttk, scrolledtext as stext
 
 # TODO: make proper stop functionality (atm it works but it's not cleanly done)
 
@@ -69,9 +69,18 @@ class App(object):
         button_clr['command'] = self.clear
         button_clr.pack(side=LEFT)
 
-        self.listbox = Listbox(self.root)
+        # self.text = stext.ScrolledText(self.root, background="WHITE", width=40, height=16)
+        # self.text.bind('<Double-Button-1>', self.list_click)
+        # self.text.pack()
+        self.frame = Frame(self.root)
+        self.listbox = Listbox(self.frame, background="WHITE")
         self.listbox.bind('<Double-Button-1>', self.list_click)
-        self.listbox.pack(fill=BOTH, expand=YES)
+        self.scroll = Scrollbar(self.frame, orient="vertical", command=self.listbox.yview)
+
+        self.listbox.configure(yscrollcommand=self.scroll.set)
+        self.frame.pack(expand=True, fill=BOTH)
+        self.listbox.pack(side="left", expand=True, fill=BOTH )
+        self.scroll.pack(side="left", fill=Y)
 
     def play(self, trackn=None):
         song_end = pygame.USEREVENT + 1
@@ -95,7 +104,8 @@ class App(object):
                 if not pygame.mixer.music.get_busy():
                     self.listbox.selection_clear(0, END)
                     self.listbox.selection_set(self.current_song, self.current_song)
-                    pygame.mixer.music.load(self.track_list[self.current_song])
+                    print("goood path = ", self.parent_path + "/" + self.track_list[self.current_song])
+                    pygame.mixer.music.load(self.parent_path + "/" + self.track_list[self.current_song])
                     # print(self.track_list[self.current_song])
                     pygame.mixer.music.play()
 
@@ -121,9 +131,12 @@ class App(object):
         else:
             self.frm.filename = askopenfilenames(initialdir="~")
 
-        for index, item in list(enumerate(self.frm.filename)):
-            self.listbox.insert(END, self.frm.filename[index])
         self.parent_path = self.frm.filename[0].rsplit('/', 1)[0]  # remember last visited dir
+        for index, item in list(enumerate(self.frm.filename)):
+            # don't show path in listbox
+            self.listbox.insert(END, self.frm.filename[index].replace(self.parent_path + "/", ""))
+
+        print("parent=", self.parent_path)
         self.track_list = list(self.listbox.get(0, END))  # get list of song
 
     def rem(self):
